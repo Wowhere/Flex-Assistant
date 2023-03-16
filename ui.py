@@ -1,5 +1,6 @@
 import sys
-from tkinter import Tk, Label, Button, Entry, StringVar, Text, Radiobutton, BooleanVar, Menu, Checkbutton, IntVar,ttk# Text, N, S, W, E, Scrollbar, Canvas, Frame
+from tkinter import Tk, Label, Button, Entry, StringVar, Radiobutton, BooleanVar, Menu, Checkbutton, IntVar, Text, ttk, NW, N, S, W, E, Canvas, Frame
+from tkinter import scrolledtext as st
 #import tkinter.font
 ##from ttkthemes import ThemedTk
 import tksheet
@@ -46,7 +47,7 @@ class DataSheet(tksheet.Sheet):
         pass
         #Menu(self,)
 
-class AddShortcutsWindow(Tk, metaclass=Singleton):
+class AddShortcutsWindow(Tk):
     def __init__(self):
         super().__init__()
         self.title('Add shortcut')
@@ -56,13 +57,13 @@ class AddShortcutsWindow(Tk, metaclass=Singleton):
 
         self.insert_result = Label(self, text='')
 
-        self.value_field_text = StringVar(self)
-        self.comment_field_text = StringVar(self)
-        self.alias_field_text = StringVar(self)
+        self.value_field_text = StringVar(self)#
+        self.comment_field_text = StringVar(self)#
+        self.alias_field_text = StringVar(self)#
         self.value_label = ttk.Label(self, text='Shortcut')
-        self.value_field = Entry(self, textvariable=self.value_field_text, borderwidth=2, relief='ridge')
+        self.value_field = st.ScrolledText(self)#), borderwidth=2, relief='ridge', var)
         self.comment_label = ttk.Label(self, text='Comment')
-        self.comment_field = Entry(self, textvariable=self.comment_field_text, borderwidth=2, relief='ridge')
+        self.comment_field = st.ScrolledText(self)#), textvariable=self.comment_field_text, borderwidth=2, relief='ridge')
         self.alias_flag = IntVar(self, 1)
         self.alias_flag_checkbutton = Checkbutton(self, text='With Alias', variable=self.alias_flag, command=self.change_alias_mode)
         self.voice_alias_label = ttk.Label(self, text='Alias')
@@ -71,7 +72,7 @@ class AddShortcutsWindow(Tk, metaclass=Singleton):
                                     command=self.add_new_shortcut,
                                     background='#33DFF2', borderwidth=2, relief='ridge')
         self.bulk_add_button = Button(self, text='Bulk Add',
-                                    command=self.add_new_shortcut,
+                                    command=self.add_csv_shortcut,
                                     background='#33DFF2', borderwidth=2, relief='ridge')
         self.insert_result.place(x=45, y=255)
         self.value_label.place(x=5, y=5)
@@ -83,16 +84,19 @@ class AddShortcutsWindow(Tk, metaclass=Singleton):
         self.voice_alias_field.place(x=80, y=125, width=400, height=30)
         self.add_button.place(x=45, y=220, width=400, height=30)
 
-        self.insert_type = BooleanVar(self)
-        self.insert_type.set(0)
-        self.import_instruction = StringVar(self)
-        self.import_instruction.set('Csv import. Format: \"Shortcut\", \"Comment\", \"Alias\"')
+        #self.insert_type = BooleanVar(self)
+        #self.insert_type.set(0)
+        #self.insert_type_flag = Checkbutton(self, text='Escaping \',\'', variable=self.insert_type, command=self.change_alias_mode)
+        #self.insert_type_flag.place(x=500, y=55)
+        #self.import_instruction = StringVar(self)
+        #self.import_instruction.set()
 
-        self.label_instruction = Label(self, textvariable=self.import_instruction)
-        self.csv_shortcuts = Text(self, width=20, height=30)
-        self.csv_shortcuts.place(x=500, y=65, width=270, height=280)
+        self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'', anchor=W)
+        self.label_instruction.place(x=500, y=5)
 
-        self.bulk_add_button.place(x=500, y=360, width=270, height=30)
+        self.csv_shortcuts = st.ScrolledText(self)#, width=20, height=30)
+        self.csv_shortcuts.place(x=500, y=85, width=270, height=280)
+        self.bulk_add_button.place(x=500, y=380, width=270, height=30)
 
         self.mainloop()
 
@@ -104,11 +108,26 @@ class AddShortcutsWindow(Tk, metaclass=Singleton):
         else:
             self.insert_result.config(text='Success', foreground='green')
 
-    def change_alias_mode(self):
+    def add_csv_shortcut(self):
+        self.insert_result.config(text='')
+        res = insert_rule_db(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
+        if not res:
+            self.insert_result.config(text='Error of csv inserting', foreground='red')
+        else:
+            self.insert_result.config(text='Success', foreground='green')
+
+    def change_alias_mode(self, ):
+        print(0)
         if self.alias_flag.get() == 0:
             self.voice_alias_field.config(state='disabled')
         elif self.alias_flag.get() == 1:
             self.voice_alias_field.config(state='normal')
+
+    # def change_insert_type(self):
+    #     if self.insert_type.get() == 0:
+    #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
+    #     elif self.insert_type.get() == 1:
+    #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
 
 # class ExtendedDataSheet(Tk):
 #     def __init__(self, root, header, data, x, y, height, width):
@@ -128,13 +147,11 @@ class AddShortcutsWindow(Tk, metaclass=Singleton):
 class AssistantApp(Tk):
     def __init__(self, query='', height=0, width=0):
         super().__init__()
-        #self.search_widgets = list()
         self.call('wm', 'attributes', '.', '-topmost', '1')
         self.title('Flex Assistant')
         self.resizable(False, False)
         self.color_backgroung = '#AEF359'
         self.color_foreground = '#3A5311'
-        #self.color_codes = {7: (0, 1, 1, 1), 6: (0, 1, 1, 0), 5: (0, 1, 0 ,1), 4: (0, 1, 0, 0), 3: (), 2: (), 1: ()}
 
         base_width = 550
         base_height = 135
