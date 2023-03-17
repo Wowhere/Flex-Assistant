@@ -25,16 +25,26 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
 
 def insert_rule_db(shortcut, alias_flag, voice_alias, comment=''):
     try:
-        if shortcut.strip() == '' and comment.strip() == '':
+        #print(shortcut)
+        #print(alias_flag)
+        #print(voice_alias)
+        #print(comment)
+        if shortcut.strip() == '':
+            #print("what")
             return False
         if alias_flag:
             new_alias = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (voice_alias,))
+            #print("new_alias")
+            #print(new_alias)
             alias_id = new_alias.lastrowid
-            print(alias_id)
+            #print("alias_id")
+            #print(alias_id)
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment, alias_id) VALUES (?, ?, ?)',
                                         (shortcut, comment, alias_id,))
         else:
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', (shortcut, comment,))
+        #print("new_shortcut")
+        #print(new_shortcut)
         conn.commit()
         conn.backup(in_memory)
         return True

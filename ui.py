@@ -57,9 +57,9 @@ class AddShortcutsWindow(Tk):
 
         self.insert_result = Label(self, text='')
 
-        self.value_field_text = StringVar(self)#
-        self.comment_field_text = StringVar(self)#
-        self.alias_field_text = StringVar(self)#
+        #self.value_field_text = StringVar(self)
+        #self.comment_field_text = StringVar(self)
+        self.alias_field_text = StringVar(self)
         self.value_label = ttk.Label(self, text='Shortcut')
         self.value_field = st.ScrolledText(self)#), borderwidth=2, relief='ridge', var)
         self.comment_label = ttk.Label(self, text='Comment')
@@ -102,7 +102,9 @@ class AddShortcutsWindow(Tk):
 
     def add_new_shortcut(self):
         self.insert_result.config(text='')
-        res = insert_rule_db(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
+        res = insert_rule_db(self.value_field.get('1.0', 'end'), self.alias_flag.get(),
+                             self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
+        #res = insert_rule_db(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
         if not res:
             self.insert_result.config(text='Error of inserting', foreground='red')
         else:
@@ -110,7 +112,7 @@ class AddShortcutsWindow(Tk):
 
     def add_csv_shortcut(self):
         self.insert_result.config(text='')
-        res = insert_rule_db(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
+        res = insert_rule_db(self.value_field.get('1.0', 'end'), self.alias_flag.get(), self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
         if not res:
             self.insert_result.config(text='Error of csv inserting', foreground='red')
         else:
