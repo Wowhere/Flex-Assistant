@@ -273,6 +273,8 @@ class AssistantApp(Tk):
 
         #self.filessheet.set_column_widths([345, 120, 70])
         self.filessheet.place(x=5, y=135, width=592, height=395)
+        self.filessheet.set_all_cell_sizes_to_text()
+        self.filessheet.set_column_widths([345, 120, 70])
         self.recent_searches_combobox.focus()
 
     def get_voice_input(self):
