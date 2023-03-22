@@ -23,7 +23,7 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
         (transcribed_word,)).fetchall()
     return search_results
 
-def insert_rule_db(shortcut, alias_flag, voice_alias, comment=''):
+def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
     try:
         #print(shortcut)
         #print(alias_flag)
@@ -51,4 +51,12 @@ def insert_rule_db(shortcut, alias_flag, voice_alias, comment=''):
     except Exception as e:
         print(e)
         print('Insert failed')
+        return False
+
+def delete_entry(id):
+    try:
+        deleting = conn.execute("")
+    except Exception as e:
+        print(e)
+        print('Deleting failed')
         return False

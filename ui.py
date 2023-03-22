@@ -42,6 +42,15 @@ class DataSheet(tksheet.Sheet):
         #self.extra_bindings('end_edit_cell', func = self.end_edit_cell)
         #self.extra_bindings('begin_edit_cell', finc = begin_edit_cell)
 
+    def delete_entry(self, x=0):
+        r = self.get_currently_selected()[0]
+        print(r)
+        cell_data = self.get_cell_data(r, 0, return_copy=True)
+        print(cell_data)
+        print(type(cell_data))
+        delete_entry(cell_data)
+
+
     def show_context_menu(self):
 
         pass
@@ -102,9 +111,9 @@ class AddShortcutsWindow(Tk):
 
     def add_new_shortcut(self):
         self.insert_result.config(text='')
-        res = insert_rule_db(self.value_field.get('1.0', 'end'), self.alias_flag.get(),
+        res = insert_entry(self.value_field.get('1.0', 'end'), self.alias_flag.get(),
                              self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
-        #res = insert_rule_db(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
+        #res = insert_entry(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
         if not res:
             self.insert_result.config(text='Error of inserting', foreground='red')
         else:
@@ -112,7 +121,7 @@ class AddShortcutsWindow(Tk):
 
     def add_csv_shortcut(self):
         self.insert_result.config(text='')
-        res = insert_rule_db(self.value_field.get('1.0', 'end'), self.alias_flag.get(), self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
+        res = insert_entry(self.value_field.get('1.0', 'end'), self.alias_flag.get(), self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
         if not res:
             self.insert_result.config(text='Error of csv inserting', foreground='red')
         else:
@@ -154,6 +163,14 @@ class AssistantApp(Tk):
         self.resizable(False, False)
         self.color_backgroung = '#AEF359'
         self.color_foreground = '#3A5311'
+
+        self.filessheet = DataSheet(self, ['Id', 'Shortcut', 'Comment', 'Alias'], data=[])
+        self.filessheet.config()
+        self.filessheet.enable_bindings('rc_popup_menu')
+        self.filessheet.popup_menu_add_command(label='test', func=lambda: print(234))
+        #self.filessheet.popup_menu_add_command(label='Delete0', func=lambda: print(self.filessheet.get_selected_cells(get_rows=True)))
+        self.filessheet.popup_menu_add_command(label='Delete', func=lambda: self.filessheet.delete_entry())
+        #self.filessheet.get_column_data()
 
         base_width = 550
         base_height = 135
@@ -226,23 +243,14 @@ class AssistantApp(Tk):
         self.destroy()
         sys.exit(0)
 
-    def get_scripts(self):
-        self.filessheet.popup_menu_add_command(label='test', func=lambda: print(234))
-
     def show_search_results(self, query, search_type):
         if query not in self.recent_searches and query.strip() != "":
             self.recent_searches.append(query)
         self.resize_window(505, 600)
-        self.filessheet = DataSheet(self, ['Id', 'Shortcut', 'Comment', 'Alias'], data=[])
-        self.filessheet.config()
-        self.filessheet.enable_bindings('rc_popup_menu')
-
-        #if self.winfo_children()
-        #self.filessheet.destroy()
-
         print('show_search_results(): ' + str(query))
         result = get_help_from_db(query.strip(), search_type, [self.values_search_flag.get(), self.comments_search_flag.get(), self.alias_search_flag.get()])
-        # print("Result: " + result)
+        print(result)
+        self.filessheet.set_sheet_data([], reset_col_positions = False, verify = False, reset_highlights = True)
         end_result = {}
         for i in result['shortcuts_values']:
             if i not in end_result.keys():
@@ -259,7 +267,6 @@ class AssistantApp(Tk):
                 end_result[i] = 1
             else:
                 end_result[i] += 1
-        #print(end_result)
         сounter = 0
         for key, value in end_result.items():
             self.filessheet.insert_row(values=key)
@@ -267,10 +274,9 @@ class AssistantApp(Tk):
             #print(color_codes)
             for k in range(0, len(color_codes)):
                 if color_codes[k] == '1':
-                    #print(color_codes[k])
                     self.filessheet.highlight_cells(row=сounter, column=k+1, bg=self.color_backgroung, fg=self.color_foreground)
             сounter += 1
-
+        self.filessheet.set_sheet_data(result)
         #self.filessheet.set_column_widths([345, 120, 70])
         self.filessheet.place(x=5, y=135, width=592, height=395)
         self.filessheet.set_all_cell_sizes_to_text()
