@@ -9,6 +9,9 @@ import pyautogui
 from subprocess import check_output, run
 from sqlite_functions import *
 from voice_functions import *
+#import pprint
+
+#pp = pprint.PrettyPrinter(indent=4)
 
 APP_SETTINGS = {
     'energy_threshold': 450,
@@ -38,21 +41,28 @@ class DataSheet(tksheet.Sheet):
                                     'row_height_resize', 'double_click_row_resize', 'rc_select', 'copy',
                                     'paste', 'undo', 'hide_columns'))
         self.configure(relief='ridge', borderwidth=1)
-        #self.extra_bindings('edit_cell', finc=)
-        #self.extra_bindings('end_edit_cell', func = self.end_edit_cell)
-        #self.extra_bindings('begin_edit_cell', finc = begin_edit_cell)
 
-    def delete_entry(self, x=0):
-        r = self.get_currently_selected()[0]
-        print(r)
-        cell_data = self.get_cell_data(r, 0, return_copy=True)
-        print(cell_data)
-        print(type(cell_data))
-        delete_entry(cell_data)
+    def delete_sheet_entry(self):
+        #pp.pprint(self.get_sheet_data())
+        re1 = self.get_currently_selected()[0]
+        #print(re1)
+        cell_data = self.get_cell_data(re1, 0, return_copy=True)
+        #print(self.get_row_data(re1, get_index=True))
+        self.highlight_cells(row=re1, column=1, bg='#FE4D4D', fg='#530000', redraw=True)
+        self.highlight_cells(row=re1, column=2, bg='#FE4D4D', fg='#530000', redraw=True)
+        delete_row(cell_data)
+
+    def delete_sheet_alias(self):
+        #pp.pprint(self.get_sheet_data())
+        re1 = self.get_currently_selected()[0]
+        print(re1)
+        cell_data = self.get_cell_data(re1, 3, return_copy=True)
+        #print(self.get_row_data(re1, get_index=True))
+        self.highlight_cells(row=re1, column=3, bg='#FE4D4D', fg='#530000', redraw=True)
+        delete_alias(cell_data)
 
 
     def show_context_menu(self):
-
         pass
         #Menu(self,)
 
@@ -70,9 +80,9 @@ class AddShortcutsWindow(Tk):
         #self.comment_field_text = StringVar(self)
         self.alias_field_text = StringVar(self)
         self.value_label = ttk.Label(self, text='Shortcut')
-        self.value_field = st.ScrolledText(self)#), borderwidth=2, relief='ridge', var)
+        self.value_field = st.ScrolledText(self)
         self.comment_label = ttk.Label(self, text='Comment')
-        self.comment_field = st.ScrolledText(self)#), textvariable=self.comment_field_text, borderwidth=2, relief='ridge')
+        self.comment_field = st.ScrolledText(self)
         self.alias_flag = IntVar(self, 1)
         self.alias_flag_checkbutton = Checkbutton(self, text='With Alias', variable=self.alias_flag, command=self.change_alias_mode)
         self.voice_alias_label = ttk.Label(self, text='Alias')
@@ -103,7 +113,7 @@ class AddShortcutsWindow(Tk):
         self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'', anchor=W)
         self.label_instruction.place(x=500, y=5)
 
-        self.csv_shortcuts = st.ScrolledText(self)#, width=20, height=30)
+        self.csv_shortcuts = st.ScrolledText(self)
         self.csv_shortcuts.place(x=500, y=85, width=270, height=280)
         self.bulk_add_button.place(x=500, y=380, width=270, height=30)
 
@@ -127,7 +137,7 @@ class AddShortcutsWindow(Tk):
         else:
             self.insert_result.config(text='Success', foreground='green')
 
-    def change_alias_mode(self, ):
+    def change_alias_mode(self):
         print(0)
         if self.alias_flag.get() == 0:
             self.voice_alias_field.config(state='disabled')
@@ -139,21 +149,6 @@ class AddShortcutsWindow(Tk):
     #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
     #     elif self.insert_type.get() == 1:
     #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
-
-# class ExtendedDataSheet(Tk):
-#     def __init__(self, root, header, data, x, y, height, width):
-#         self.headers(header)
-#         self.set_sheet_data(data)
-#         self.enable_bindings(('single_select', 'drag_select',
-#                                     'column_select', 'row_select', 'column_width_resize','double_click_column_resize',
-#                                     'row_width_resize', 'column_height_resize', 'arrowkeys',
-#                                     'row_height_resize', 'double_click_row_resize', 'rc_select', 'copy',
-#                                     'paste', 'undo'))
-#         self.configure(relief='ridge', borderwidth=1)
-#         super().__init__()
-#         self.call('wm', 'attributes', '.', '-topmost', '1')
-#         self.title(header)
-#         self.resizable(True, True)
 
 class AssistantApp(Tk):
     def __init__(self, query='', height=0, width=0):
@@ -169,7 +164,8 @@ class AssistantApp(Tk):
         self.filessheet.enable_bindings('rc_popup_menu')
         self.filessheet.popup_menu_add_command(label='test', func=lambda: print(234))
         #self.filessheet.popup_menu_add_command(label='Delete0', func=lambda: print(self.filessheet.get_selected_cells(get_rows=True)))
-        self.filessheet.popup_menu_add_command(label='Delete', func=lambda: self.filessheet.delete_entry())
+        self.filessheet.popup_menu_add_command(label='Delete shortcut', func=lambda: self.filessheet.delete_sheet_entry())
+        self.filessheet.popup_menu_add_command(label='Delete alias', func=lambda: self.filessheet.delete_sheet_alias())
         #self.filessheet.get_column_data()
 
         base_width = 550

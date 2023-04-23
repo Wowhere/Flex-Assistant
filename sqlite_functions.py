@@ -53,10 +53,24 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
         print('Insert failed')
         return False
 
-def delete_entry(id):
+def delete_row(id):
     try:
-        deleting = conn.execute("")
+        deleting = conn.execute("DELETE FROM shortcuts WHERE shortcuts.id = (?)", (id,)).fetchall()
+        conn.commit()
+        conn.backup(in_memory)
+        return True
     except Exception as e:
         print(e)
-        print('Deleting failed')
+        print('Deleting row failed')
+        return False
+
+def delete_alias(alias_value):
+    try:
+        deleting = conn.execute("DELETE FROM voice_aliases WHERE voice_aliases.alias = (?)", (alias_value,)).fetchall()
+        conn.commit()
+        conn.backup(in_memory)
+        return True
+    except Exception as e:
+        print(e)
+        print('Deleting alias failed')
         return False

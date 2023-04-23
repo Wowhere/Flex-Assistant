@@ -7,11 +7,9 @@ from ui import AssistantApp, AddShortcutsWindow
 
 model_flag = True
 if not os.path.isdir('model'):
-    #error = WarningWindow('\'Model\' folder is absent. Add folder \'Model\' with vosk model in folder with application for work of voice search')
     messagebox.showwarning(title='\'Model\' folder is absent', message='\'Model\' folder is absent. Add folder \'Model\' with vosk model in folder with application for work of voice search')
     model_flag = False
 elif len(os.listdir('model')) == 0:
-    #error = WarningWindow('\'Model\' folder is empty. Add vosk model to folder \'Model\' for work of voice search')
     messagebox.showwarning(title='\'Model\' folder is empty', message='\'Model\' folder is empty. Add vosk model to folder \'Model\' for work of voice search')
     model_flag = False
 else:
@@ -46,7 +44,7 @@ def app_restore():
     #app.mainloop()
 
 if __name__ == '__main__':
-    image = Image.open('C:\\Users\\Admin\\PycharmProjects\\pythonProject1\\help.png')
+    image = Image.open(os.path.join(os.getcwd(),'help.png'))
     right_click_menu = Menu(
         #MenuItem('Voice Search', voice_input, enabled=True, default=True, visible=True),
         #MenuItem('Open Assistant', app_restore),
