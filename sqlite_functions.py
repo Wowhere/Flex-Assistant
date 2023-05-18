@@ -25,26 +25,15 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
 
 def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
     try:
-        #print(shortcut)
-        #print(alias_flag)
-        #print(voice_alias)
-        #print(comment)
         if shortcut.strip() == '':
-            #print("what")
             return False
         if alias_flag:
             new_alias = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (voice_alias,))
-            #print("new_alias")
-            #print(new_alias)
             alias_id = new_alias.lastrowid
-            #print("alias_id")
-            #print(alias_id)
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment, alias_id) VALUES (?, ?, ?)',
                                         (shortcut, comment, alias_id,))
         else:
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', (shortcut, comment,))
-        #print("new_shortcut")
-        #print(new_shortcut)
         conn.commit()
         conn.backup(in_memory)
         return True
@@ -64,6 +53,17 @@ def delete_row(id):
         print('Deleting row failed')
         return False
 
+def update_row(id, index, value):
+    try:
+        deleting = conn.execute("UPDATE shortcuts WHERE shortcuts.id = (?)", (id,)).fetchall()
+        conn.commit()
+        conn.backup(in_memory)
+        return True
+    except Exception as e:
+        print(e)
+        print('Updating row failed')
+        return False
+
 def delete_alias(alias_value):
     try:
         deleting = conn.execute("DELETE FROM voice_aliases WHERE voice_aliases.alias = (?)", (alias_value,)).fetchall()
@@ -74,3 +74,14 @@ def delete_alias(alias_value):
         print(e)
         print('Deleting alias failed')
         return False
+
+def update_alias(alias_value):
+    try:
+        conn.commit()
+        conn.backup(in_memory)
+        return True
+    except Exception as e:
+        print(e)
+        print('Updating alias failed')
+        return False
+
