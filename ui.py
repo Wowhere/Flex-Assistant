@@ -4,7 +4,6 @@ from tkinter import scrolledtext as st
 #import tkinter.font
 ##from ttkthemes import ThemedTk
 import tksheet
-import webbrowser
 import pyautogui
 from subprocess import check_output, run
 from sqlite_functions import *
@@ -21,25 +20,18 @@ APP_SETTINGS = {
 
 screen_size = pyautogui.size()
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
         super().__init__(root, theme='light green')
         self.headers(header)
         #self.hide('row_index')
-        self.display_subset_of_columns([1, 2, 3], enable = True)
+        self.display_subset_of_columns([1, 2, 3], enable=True)
         self.set_sheet_data(data)
         self.enable_bindings(('arrowkeys', 'single_select', 'drag_select',
                                     'column_select', 'row_select', 'column_width_resize', 'double_click_column_resize',
                                     'row_width_resize', 'column_height_resize',
                                     'row_height_resize', 'double_click_row_resize', 'rc_select', 'rc_popup_menu', 'copy',
-                                    'undo', 'hide_columns')) #edit_cell, 'paste'
+                                    'undo', 'hide_columns'))
         self.configure(relief='ridge', borderwidth=1)
 
     def delete_sheet_entry(self):
@@ -62,13 +54,8 @@ class DataSheet(tksheet.Sheet):
         delete_alias(cell_data)
 
     def end_edit_cell(self, event):
-        print(event)
-        print(type(event))
-        re1 = self.get_currently_selected()[0]
-        cell_data = self.get_cell_data(re1, 0, return_copy=True)
-        print(re1)
-        print(cell_data)
-        update_alias()
+        cell_data = self.get_cell_data(event[0], 0, return_copy=True)
+        update_row(cell_data, self.get_currently_selected()[1], event[3])
 
     def show_context_menu(self):
         pass
@@ -87,8 +74,6 @@ class AddShortcutsWindow(Tk):
 
         self.insert_result = Label(self, text='')
 
-        #self.value_field_text = StringVar(self)
-        #self.comment_field_text = StringVar(self)
         self.alias_field_text = StringVar(self)
         self.value_label = ttk.Label(self, text='Shortcut')
         self.value_field = st.ScrolledText(self)
@@ -164,24 +149,12 @@ class AssistantApp(Tk):
     def __init__(self, query='', height=0, width=0):
         super().__init__()
         self.call('wm', 'attributes', '.', '-topmost', '1')
-        self.title('Flex Assistant')
+        self.title('Chill Assistant')
         self.resizable(False, False)
         self.color_backgroung = '#AEF359'
         self.color_foreground = '#3A5311'
-        #def lol():
-        #    print('lol')
 
         self.filessheet = DataSheet(self, ['Id', 'Shortcut', 'Comment', 'Alias'], data=[])
-
-        #self.filessheet.popup_menu_add_command(label='Edit', func=lambda: self.filessheet.extra_bindings([("begin_edit_cell", lol)]))#func=lambda: print(self.filessheet.get_cell_data(self.filessheet.get_currently_selected()[0],self.filessheet.get_currently_selected()[1])))
-        #self.filessheet.popup_menu_add_command(label='Edit1', func=lambda: print(self.filessheet.get_selected_))
-        #self.filessheet.popup_menu_add_command(label='test', func=lambda: print(234))
-        #self.filessheet.popup_menu_add_command(label='Delete0', func=lambda: print(self.filessheet.get_selected_cells(get_rows=True)))
-        #self.filessheet.popup_menu_add_command(label='Delete shortcut', func=lambda: self.filessheet.delete_sheet_entry())
-        #self.filessheet.popup_menu_add_command(label='Delete alias', func=lambda: self.filessheet.delete_sheet_alias())
-        #self.filessheet.popup_menu_add_command(label='Undo deleting shortcut', func=lambda: self.filessheet.delete_sheet_alias())
-        #self.filessheet.popup_menu_add_command(label='Restore alias', func=lambda: self.filessheet.delete_sheet_alias())
-        #self.filessheet.get_column_data()
 
         base_width = 550
         base_height = 135
@@ -203,7 +176,7 @@ class AssistantApp(Tk):
         self.search_settings_fuzzy = Radiobutton(self, text='Fuzzy', variable=self.search_type, value=1)
         self.search_settings_strict = Radiobutton(self, text='Strict', variable=self.search_type, value=0)
         self.recent_searches_combobox = ttk.Combobox(self, textvariable=self.search_text, values=self.recent_searches, postcommand=self.update_recent_queries)
-        self.editing_button = Button(self, text='Editing off', background='#FFAC1C', command=self.edit_mode_toggle, borderwidth=2, relief='ridge')
+        self.editing_button = Button(self, text='Editing off', background='#B0B0B0', command=self.edit_mode_toggle, borderwidth=2, relief='ridge')
         self.values_search_flag = IntVar(self, value=1)
         self.comments_search_flag = IntVar(self, value=1)
         self.alias_search_flag = IntVar(self, value=1)
@@ -211,7 +184,7 @@ class AssistantApp(Tk):
         self.shortcuts_values_search = Checkbutton(self, text='Shortcut', variable=self.values_search_flag)
         self.shortcuts_comments_search = Checkbutton(self, text='Comment', variable=self.comments_search_flag)
         self.shortcuts_alias_search = Checkbutton(self, text='Alias', variable=self.alias_search_flag)
-        #self.uniqueness_results_flag = Checkbutton(self, text='Unique', variable=self.uniqueness_flag)
+        #self.uniqueness_results_flag = Checkbutton(self, text='Unique', variable=self.uniquenes s_flag)
         if query != "":
             self.recent_searches_combobox.insert(0, query)
             self.show_search_results(query, 1)
@@ -241,26 +214,27 @@ class AssistantApp(Tk):
     def edit_mode_toggle(self):
         if self.app_mode == 0:
             self.filessheet.enable_bindings('edit_cell', 'paste')
-            self.filessheet.extra_bindings([("end_edit_cell", self.filessheet.end_edit_cell)])  #('begin_edit_cell', self.begin_edit_cell),
+            self.filessheet.extra_bindings([('end_edit_cell', self.filessheet.end_edit_cell)])  #('begin_edit_cell', self.begin_edit_cell),
             self.filessheet.popup_menu_add_command(label='Delete shortcut',
                                                    func=lambda: self.filessheet.delete_sheet_entry())
             self.filessheet.popup_menu_add_command(label='Delete alias',
                                                    func=lambda: self.filessheet.delete_sheet_alias())
             self.filessheet.refresh()
+            self.editing_button.config(background='#FFAC1C')
             self.editing_button.config(text='Editing on')
             self.app_mode = 1
         elif self.app_mode == 1:
             self.filessheet.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
             self.filessheet.popup_menu_del_command(label='Delete shortcut')
             self.filessheet.popup_menu_del_command(label='Delete alias')
-            #self.filessheet.extra_bindings([("begin_edit_cell", self.begin_edit_cell)])
+            self.editing_button.config(background='#B0B0B0')
             self.editing_button.config(text='Editing off')
             self.app_mode = 0
 
     def show_shortcut_window(self):
         add_window = AddShortcutsWindow()
 
-    def resize_window(self, height, width, x=0,y=0):
+    def resize_window(self, height, width, x=0, y=0):
         if x == 0 and y == 0:
             self.geometry(str(width) + 'x' + str(height) + '+' + str(screen_size[0]-(width+5)) + '+' + str(screen_size[1]-(height+90)))
         else:
@@ -280,7 +254,7 @@ class AssistantApp(Tk):
         sys.exit(0)
 
     def show_search_results(self, query, search_type):
-        if query not in self.recent_searches and query.strip() != "":
+        if query not in self.recent_searches and query.strip() != '':
             self.recent_searches.append(query)
         self.resize_window(505, 600)
         print('show_search_results(): ' + str(query))

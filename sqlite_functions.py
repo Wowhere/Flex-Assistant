@@ -44,7 +44,8 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
 
 def delete_row(id):
     try:
-        deleting = conn.execute("DELETE FROM shortcuts WHERE shortcuts.id = (?)", (id,)).fetchall()
+        deleting_row_result = conn.execute('DELETE FROM shortcuts.shortcut WHERE shortcuts.id = (?)', (id,)).fetchall()
+        print(deleting_row_result)
         conn.commit()
         conn.backup(in_memory)
         return True
@@ -55,7 +56,17 @@ def delete_row(id):
 
 def update_row(id, index, value):
     try:
-        deleting = conn.execute("UPDATE shortcuts WHERE shortcuts.id = (?)", (id,)).fetchall()
+        print("id,index,value")
+        print(id)
+        print(index)
+        print(value)
+        if index == 0:
+            updating_row_result = conn.execute('UPDATE shortcuts SET shortcut=(?) WHERE id = (?)', (value, id,)).fetchall()
+        elif index == 1:
+            updating_row_result = conn.execute('UPDATE shortcuts SET comment=(?) WHERE id = (?)', (value, id,)).fetchall()
+        else:
+            updating_row_result = '***'
+        print(updating_row_result)
         conn.commit()
         conn.backup(in_memory)
         return True
@@ -66,7 +77,8 @@ def update_row(id, index, value):
 
 def delete_alias(alias_value):
     try:
-        deleting = conn.execute("DELETE FROM voice_aliases WHERE voice_aliases.alias = (?)", (alias_value,)).fetchall()
+        deleting_alias_result = conn.execute('DELETE FROM voice_aliases WHERE voice_aliases.alias = (?)', (alias_value,)).fetchall()
+        print(deleting_alias_result)
         conn.commit()
         conn.backup(in_memory)
         return True
@@ -74,14 +86,3 @@ def delete_alias(alias_value):
         print(e)
         print('Deleting alias failed')
         return False
-
-def update_alias(alias_value):
-    try:
-        conn.commit()
-        conn.backup(in_memory)
-        return True
-    except Exception as e:
-        print(e)
-        print('Updating alias failed')
-        return False
-
