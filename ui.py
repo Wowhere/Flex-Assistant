@@ -1,6 +1,6 @@
 import sys
 from tkinter import Tk, Label, Button, Entry, StringVar, Radiobutton, BooleanVar, Menu, Checkbutton, IntVar, Text, ttk, NW, N, S, W, E, Canvas, Frame
-from tkinter import scrolledtext as st
+from tkinter import scrolledtext as st, filedialog as fd
 #import tkinter.font
 ##from ttkthemes import ThemedTk
 import tksheet
@@ -8,6 +8,7 @@ import pyautogui
 from subprocess import check_output, run
 from sqlite_functions import *
 from voice_functions import *
+import csv
 #import pprint
 
 #pp = pprint.PrettyPrinter(indent=4)
@@ -15,14 +16,25 @@ from voice_functions import *
 APP_SETTINGS = {
     'energy_threshold': 450,
     'pause_threshold': 0.5,
-    'adjust_for_ambient_noise': False
+    'adjust_for_ambient_noise': False,
+    'datasheet_theme': 'light green',
+    'datasheet_text_color': '',
+    'datasheet_highlight_color': '',
+    'add_window_width': 800,
+    'add_window_height': 270,
+    'add_window_topmost': True,
+    'add_window_single': True,
+    'assistant_window_width': 800,
+    'assistant_window_height': 270,
+    'assistant_window_topmost': True,
+    'assistant_window_single': True
 }
 
 screen_size = pyautogui.size()
 
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
-        super().__init__(root, theme='light green')
+        super().__init__(root, theme='light green')  #datasheet_theme
         self.headers(header)
         #self.hide('row_index')
         self.display_subset_of_columns([1, 2, 3], enable=True)
@@ -61,15 +73,12 @@ class DataSheet(tksheet.Sheet):
         pass
         #Menu(self,)
 
-    def begin_edit_cell(self):
-        pass
-
 class AddShortcutsWindow(Tk):
     def __init__(self):
         super().__init__()
         self.title('Add shortcut')
         self.call('wm', 'attributes', '.', '-topmost', '1')
-        self.geometry(str('800') + 'x' + str('450'))
+        self.geometry(str('800') + 'x' + str('270'))
         self.resizable(False, False)
 
         self.insert_result = Label(self, text='')
@@ -86,7 +95,7 @@ class AddShortcutsWindow(Tk):
         self.add_button = Button(self, text='Add',
                                     command=self.add_new_shortcut,
                                     background='#33DFF2', borderwidth=2, relief='ridge')
-        self.bulk_add_button = Button(self, text='Bulk Add',
+        self.bulk_add_button = Button(self, text='Import from file',
                                     command=self.add_csv_shortcut,
                                     background='#33DFF2', borderwidth=2, relief='ridge')
         self.insert_result.place(x=45, y=255)
@@ -99,19 +108,13 @@ class AddShortcutsWindow(Tk):
         self.voice_alias_field.place(x=80, y=165, width=400, height=30)
         self.add_button.place(x=45, y=220, width=400, height=30)
 
-        #self.insert_type = BooleanVar(self)
-        #self.insert_type.set(0)
-        #self.insert_type_flag = Checkbutton(self, text='Escaping \',\'', variable=self.insert_type, command=self.change_alias_mode)
-        #self.insert_type_flag.place(x=500, y=55)
-        #self.import_instruction = StringVar(self)
-        #self.import_instruction.set()
+        self.separator = ttk.Separator(self, orient='vertical')
+        self.separator.place(x=490, height=450)
 
         self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'', anchor=W)
-        self.label_instruction.place(x=500, y=5)
+        self.label_instruction.place(x=505, y=5)
 
-        self.csv_shortcuts = st.ScrolledText(self)
-        self.csv_shortcuts.place(x=500, y=85, width=270, height=280)
-        self.bulk_add_button.place(x=500, y=380, width=270, height=30)
+        self.bulk_add_button.place(x=505, y=220, width=270, height=30)
 
         self.mainloop()
 
@@ -127,23 +130,27 @@ class AddShortcutsWindow(Tk):
 
     def add_csv_shortcut(self):
         self.insert_result.config(text='')
-        res = insert_entry(self.value_field.get('1.0', 'end'), self.alias_flag.get(), self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
-        if not res:
-            self.insert_result.config(text='Error of csv inserting', foreground='red')
-        else:
-            self.insert_result.config(text='Success', foreground='green')
+        filetypes = (
+                ('Csv files', '*.csv'),
+                ('All files', '*.*')
+        )
+        filename = fd.askopenfilename(
+                title='Import from file',
+                initialdir='/',
+                filetypes=filetypes)
+        with open(filename) as importfile:
+            imported_rules = list(csv.reader(importfile))
+        print(imported_rules)
+        # if not import_array:
+        #     self.insert_result.config(text='Error of csv inserting', foreground='red')
+        # else:
+        #     self.insert_result.config(text='Success', foreground='green')
 
     def change_alias_mode(self):
         if self.alias_flag.get() == 0:
             self.voice_alias_field.config(state='disabled')
         elif self.alias_flag.get() == 1:
             self.voice_alias_field.config(state='normal')
-
-    # def change_insert_type(self):
-    #     if self.insert_type.get() == 0:
-    #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
-    #     elif self.insert_type.get() == 1:
-    #         self.import_instruction.config(text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'')
 
 class AssistantApp(Tk):
     def __init__(self, query='', height=0, width=0):
