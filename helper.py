@@ -15,6 +15,25 @@ elif len(os.listdir('model')) == 0:
 else:
     from voice_functions import *
 
+DEFAULT_APP_SETTINGS = {
+    'app_shortcut': '',
+    'energy_threshold': 450,
+    'pause_threshold': 0.5,
+    'adjust_for_ambient_noise': False,
+    'datasheet_theme': 'light green',
+    'datasheet_text_color': '',
+    'datasheet_highlight_color': '',
+    'datasheet_background_color': '',
+    'add_window_width': 800,
+    'add_window_height': 270,
+    'add_window_topmost': True,
+    'add_window_single': True,
+    'assistant_window_width': 530,
+    'assistant_window_height': 135,
+    'assistant_window_topmost': True,
+    'assistant_window_single': True
+}
+
 def get_app_settings():
     pass
 
@@ -26,8 +45,8 @@ def close_tray(icon):
     icon.stop()
     os._exit(0)
 
-def edit_settings():
-    pass
+#def edit_settings():
+#    pass
 
 def add_note():
     note_app = AddShortcutsWindow()
@@ -51,7 +70,7 @@ if __name__ == '__main__':
         MenuItem('Open Assistant', app_restore, enabled=True, default=True, visible=True),
         MenuItem('Voice Search', voice_input, enabled=model_flag),
         MenuItem('Add shortcut', add_note),
-        MenuItem('Settings', edit_settings),
+#        MenuItem('Settings', edit_settings),
         MenuItem('Exit', lambda: close_tray(icon)))
     icon = Icon('Helper', image, 'Helper', right_click_menu)
     # add_hotkey('Ctrl+`', fast_answer)

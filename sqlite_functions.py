@@ -18,7 +18,7 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
             'SELECT shortcuts.id, shortcuts.shortcut, shortcuts.comment, voice_aliases.alias FROM shortcuts LEFT JOIN voice_aliases ON shortcuts.alias_id = voice_aliases.id WHERE shortcuts.comment LIKE (?)',
             (transcribed_word,)).fetchall()
     if flags[2] == 1:
-        search_results['shortcuts_aliases'] = in_memory.execute(
+        search_results['shortcuts_tags'] = in_memory.execute(
         'SELECT shortcuts.id, shortcuts.shortcut, shortcuts.comment, voice_aliases.alias FROM shortcuts INNER JOIN voice_aliases ON shortcuts.alias_id = voice_aliases.id WHERE voice_aliases.alias LIKE (?)',
         (transcribed_word,)).fetchall()
     return search_results
@@ -26,7 +26,7 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
 def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
     try:
         if shortcut.strip() == '':
-            return False
+            return 'Empty shortcut. Please input shortcut'
         if alias_flag:
             new_alias = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (voice_alias,))
             alias_id = new_alias.lastrowid
@@ -36,11 +36,10 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', (shortcut, comment,))
         conn.commit()
         conn.backup(in_memory)
-        return True
+        return 'Insert successful'
     except Exception as e:
         print(e)
-        print('Insert failed')
-        return False
+        return e
 
 def delete_row(id):
     try:
@@ -48,15 +47,14 @@ def delete_row(id):
         print(deleting_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return True
+        return 'Removal successful'
     except Exception as e:
         print(e)
-        print('Deleting row failed')
-        return False
+        return e
 
 def update_row(id, index, value):
     try:
-        print("id,index,value")
+        print('id,index,value')
         print(id)
         print(index)
         print(value)
@@ -69,11 +67,10 @@ def update_row(id, index, value):
         print(updating_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return True
+        return 'Update successful'
     except Exception as e:
         print(e)
-        print('Updating row failed')
-        return False
+        return e
 
 def delete_alias(alias_value):
     try:
@@ -84,5 +81,4 @@ def delete_alias(alias_value):
         return True
     except Exception as e:
         print(e)
-        print('Deleting alias failed')
-        return False
+        return e

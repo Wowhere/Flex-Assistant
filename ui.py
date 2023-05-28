@@ -13,23 +13,6 @@ import csv
 
 #pp = pprint.PrettyPrinter(indent=4)
 
-APP_SETTINGS = {
-    'energy_threshold': 450,
-    'pause_threshold': 0.5,
-    'adjust_for_ambient_noise': False,
-    'datasheet_theme': 'light green',
-    'datasheet_text_color': '',
-    'datasheet_highlight_color': '',
-    'add_window_width': 800,
-    'add_window_height': 270,
-    'add_window_topmost': True,
-    'add_window_single': True,
-    'assistant_window_width': 800,
-    'assistant_window_height': 270,
-    'assistant_window_topmost': True,
-    'assistant_window_single': True
-}
-
 screen_size = pyautogui.size()
 
 class DataSheet(tksheet.Sheet):
@@ -73,6 +56,22 @@ class DataSheet(tksheet.Sheet):
         pass
         #Menu(self,)
 
+    # def edit_mode_toggle(self):
+    #     if self.app_mode == 0:
+    #         self.enable_bindings('edit_cell', 'paste')
+    #         self.extra_bindings([('end_edit_cell', self.end_edit_cell)])  #('begin_edit_cell', self.begin_edit_cell),
+    #         self.popup_menu_add_command(label='Delete shortcut',
+    #                                                func=lambda: self.delete_sheet_entry())
+    #         self.popup_menu_add_command(label='Delete alias',
+    #                                                func=lambda: self.delete_sheet_alias())
+    #         self.refresh()
+    #         self.app_mode = 1
+    #     elif self.app_mode == 1:
+    #         self.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
+    #         self.popup_menu_del_command(label='Delete shortcut')
+    #         self.popup_menu_del_command(label='Delete alias')
+    #         self.app_mode = 0
+
 class AddShortcutsWindow(Tk):
     def __init__(self):
         super().__init__()
@@ -111,7 +110,7 @@ class AddShortcutsWindow(Tk):
         self.separator = ttk.Separator(self, orient='vertical')
         self.separator.place(x=490, height=450)
 
-        self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Alias\'', anchor=W)
+        self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Tag\'', anchor=W)
         self.label_instruction.place(x=505, y=5)
 
         self.bulk_add_button.place(x=505, y=220, width=270, height=30)
@@ -122,7 +121,6 @@ class AddShortcutsWindow(Tk):
         self.insert_result.config(text='')
         res = insert_entry(self.value_field.get('1.0', 'end'), self.alias_flag.get(),
                              self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
-        #res = insert_entry(self.value_field_text.get(), self.alias_flag.get(), self.comment_field_text.get(), self.alias_field_text.get())
         if not res:
             self.insert_result.config(text='Error of inserting', foreground='red')
         else:
@@ -161,7 +159,7 @@ class AssistantApp(Tk):
         self.color_backgroung = '#AEF359'
         self.color_foreground = '#3A5311'
 
-        self.filessheet = DataSheet(self, ['Id', 'Shortcut', 'Comment', 'Alias'], data=[])
+        self.filessheet = DataSheet(self, ['Id', 'Shortcut', 'Comment', 'Tag'], data=[])
 
         base_width = 550
         base_height = 135
@@ -190,7 +188,7 @@ class AssistantApp(Tk):
         self.uniqueness_flag = IntVar(self, value=1)
         self.shortcuts_values_search = Checkbutton(self, text='Shortcut', variable=self.values_search_flag)
         self.shortcuts_comments_search = Checkbutton(self, text='Comment', variable=self.comments_search_flag)
-        self.shortcuts_alias_search = Checkbutton(self, text='Alias', variable=self.alias_search_flag)
+        self.shortcuts_alias_search = Checkbutton(self, text='Tag', variable=self.alias_search_flag)
         #self.uniqueness_results_flag = Checkbutton(self, text='Unique', variable=self.uniquenes s_flag)
         if query != "":
             self.recent_searches_combobox.insert(0, query)
@@ -279,7 +277,7 @@ class AssistantApp(Tk):
                 end_result[i] = 2
             else:
                 end_result[i] += 2
-        for i in result['shortcuts_aliases']:
+        for i in result['shortcuts_tags']:
             if i not in end_result.keys():
                 end_result[i] = 1
             else:
