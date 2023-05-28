@@ -26,7 +26,7 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
 def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
     try:
         if shortcut.strip() == '':
-            return 'Empty shortcut. Please input shortcut'
+            return (False,'Empty shortcut. Please input shortcut')
         if alias_flag:
             new_alias = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (voice_alias,))
             alias_id = new_alias.lastrowid
@@ -36,10 +36,10 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', (shortcut, comment,))
         conn.commit()
         conn.backup(in_memory)
-        return 'Insert successful'
+        return (True,'Insert successful')
     except Exception as e:
         print(e)
-        return e
+        return (False,e)
 
 def delete_row(id):
     try:
@@ -47,10 +47,10 @@ def delete_row(id):
         print(deleting_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return 'Removal successful'
+        return (True,'Shortcut removal successful')
     except Exception as e:
         print(e)
-        return e
+        return (False,e)
 
 def update_row(id, index, value):
     try:
@@ -67,10 +67,10 @@ def update_row(id, index, value):
         print(updating_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return 'Update successful'
+        return (True, 'Update successful')
     except Exception as e:
         print(e)
-        return e
+        return (False, e)
 
 def delete_alias(alias_value):
     try:
@@ -78,7 +78,7 @@ def delete_alias(alias_value):
         print(deleting_alias_result)
         conn.commit()
         conn.backup(in_memory)
-        return True
+        return (True, 'Tag removal successful')
     except Exception as e:
         print(e)
-        return e
+        return (False, e)

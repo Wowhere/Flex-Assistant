@@ -77,7 +77,7 @@ class AddShortcutsWindow(Tk):
         super().__init__()
         self.title('Add shortcut')
         self.call('wm', 'attributes', '.', '-topmost', '1')
-        self.geometry(str('800') + 'x' + str('270'))
+        self.geometry(str('800') + 'x' + str('290'))
         self.resizable(False, False)
 
         self.insert_result = Label(self, text='')
@@ -97,7 +97,7 @@ class AddShortcutsWindow(Tk):
         self.bulk_add_button = Button(self, text='Import from file',
                                     command=self.add_csv_shortcut,
                                     background='#33DFF2', borderwidth=2, relief='ridge')
-        self.insert_result.place(x=45, y=255)
+        self.insert_result.place(x=45, y=260)
         self.value_label.place(x=5, y=5)
         self.value_field.place(x=80, y=5, width=400, height=60)
         self.comment_label.place(x=5, y=75)
@@ -108,7 +108,10 @@ class AddShortcutsWindow(Tk):
         self.add_button.place(x=45, y=220, width=400, height=30)
 
         self.separator = ttk.Separator(self, orient='vertical')
-        self.separator.place(x=490, height=450)
+        self.separator.place(x=490, height=260)
+
+        self.result_separator = ttk.Separator(self, orient='horizontal')
+        self.result_separator.place(y=260, width=800)
 
         self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Tag\'', anchor=W)
         self.label_instruction.place(x=505, y=5)
@@ -121,10 +124,10 @@ class AddShortcutsWindow(Tk):
         self.insert_result.config(text='')
         res = insert_entry(self.value_field.get('1.0', 'end'), self.alias_flag.get(),
                              self.alias_field_text.get(), self.comment_field.get('1.0', 'end'))
-        if not res:
-            self.insert_result.config(text='Error of inserting', foreground='red')
-        else:
-            self.insert_result.config(text='Success', foreground='green')
+        if res[0] == False:
+            self.insert_result.config(text=res[1], foreground='red')
+        elif res[0] == True:
+            self.insert_result.config(text=res[1], foreground='green')
 
     def add_csv_shortcut(self):
         self.insert_result.config(text='')

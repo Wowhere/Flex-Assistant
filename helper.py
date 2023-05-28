@@ -4,6 +4,7 @@ from pystray import Icon, Menu, MenuItem
 from PIL import Image
 #from keyboard import add_hotkey
 from ui import AssistantApp, AddShortcutsWindow
+import json
 
 model_flag = True
 if not os.path.isdir('model'):
