@@ -17,10 +17,9 @@ screen_size = pyautogui.size()
 
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
-        super().__init__(root, theme='light green')  #datasheet_theme
+        super().__init__(root, theme='light green')
         self.headers(header)
-        #self.hide('row_index')
-        self.display_subset_of_columns([1, 2, 3], enable=True)
+        self.hide_columns(columns=0)
         self.set_sheet_data(data)
         self.enable_bindings(('arrowkeys', 'single_select', 'drag_select',
                                     'column_select', 'row_select', 'column_width_resize', 'double_click_column_resize',
@@ -71,6 +70,24 @@ class DataSheet(tksheet.Sheet):
     #         self.popup_menu_del_command(label='Delete shortcut')
     #         self.popup_menu_del_command(label='Delete alias')
     #         self.app_mode = 0
+
+class VoiceActionsMenu(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('Variants')
+        self.call('wm', 'attributes', '.', '-topmost', '1')
+        self.geometry(str('800') + 'x' + str('290'))
+        self.resizable(True, True)
+        self.mainloop()
+
+class VoiceSearchIndicator(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('Searching...')
+        self.call('wm', 'attributes', '.', '-topmost', '1')
+        self.geometry(str('800') + 'x' + str('290'))
+        self.resizable(False, False)
+        self.mainloop()
 
 class AddShortcutsWindow(Tk):
     def __init__(self):
@@ -133,6 +150,7 @@ class AddShortcutsWindow(Tk):
         self.insert_result.config(text='')
         filetypes = (
                 ('Csv files', '*.csv'),
+                ('Text files', '*.txt'),
                 ('All files', '*.*')
         )
         filename = fd.askopenfilename(
@@ -230,6 +248,8 @@ class AssistantApp(Tk):
             self.filessheet.refresh()
             self.editing_button.config(background='#FFAC1C')
             self.editing_button.config(text='Editing on')
+            self.filessheet.dropdown_column(c=3, values = ["val 1", "val 2"])
+            #self.filessheet.create_dropdown(r=1, c=1, values=[1,2,3,4])
             self.app_mode = 1
         elif self.app_mode == 1:
             self.filessheet.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
