@@ -41,6 +41,16 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
         print(e)
         return (False,e)
 
+def bulk_insert_entry(import_list):
+    try:
+        new_alias = conn.executemany('INSERT INTO shortcuts (shortcut, comment, )')
+        conn.commit()
+        conn.backup(in_memory)
+        return (True,'Import successful')
+    except Exception as e:
+        print(e)
+        return (False,e)
+
 def delete_row(id):
     try:
         deleting_row_result = conn.execute('DELETE FROM shortcuts.shortcut WHERE shortcuts.id = (?)', (id,)).fetchall()

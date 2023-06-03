@@ -26,6 +26,7 @@ class DataSheet(tksheet.Sheet):
                                     'row_width_resize', 'column_height_resize',
                                     'row_height_resize', 'double_click_row_resize', 'rc_select', 'rc_popup_menu', 'copy',
                                     'undo', 'hide_columns'))
+        #self.set_options(edit_cell_validation=False)
         self.configure(relief='ridge', borderwidth=1)
 
     def delete_sheet_entry(self):
@@ -50,6 +51,7 @@ class DataSheet(tksheet.Sheet):
     def end_edit_cell(self, event):
         cell_data = self.get_cell_data(event[0], 0, return_copy=True)
         update_row(cell_data, self.get_currently_selected()[1], event[3])
+        return event[3]
 
     def show_context_menu(self):
         pass
@@ -130,6 +132,13 @@ class AddShortcutsWindow(Tk):
         self.result_separator = ttk.Separator(self, orient='horizontal')
         self.result_separator.place(y=260, width=800)
 
+        self.delimiter_field_text = StringVar(self, value=',')
+        self.delimiter_label = ttk.Label(self, text='Delimiter')
+        self.delimiter_field = Entry(self, textvariable=self.delimiter_field_text, borderwidth=2, relief='ridge')
+
+        self.delimiter_label.place(x=505, y=75)
+        self.delimiter_field.place(x=575, y=75)
+
         self.label_instruction = ttk.Label(self, text='Csv import.\n Format: \'Shortcut\', \'Comment\', \'Tag\'', anchor=W)
         self.label_instruction.place(x=505, y=5)
 
@@ -160,10 +169,11 @@ class AddShortcutsWindow(Tk):
         with open(filename) as importfile:
             imported_rules = list(csv.reader(importfile))
         print(imported_rules)
-        # if not import_array:
-        #     self.insert_result.config(text='Error of csv inserting', foreground='red')
-        # else:
-        #     self.insert_result.config(text='Success', foreground='green')
+        res = bulk_insert_entry(imported_rules)
+        if res[0] == False:
+            self.insert_result.config(text=res[1], foreground='red')
+        elif res[0] == True:
+            self.insert_result.config(text=res[1], foreground='green')
 
     def change_alias_mode(self):
         if self.alias_flag.get() == 0:
