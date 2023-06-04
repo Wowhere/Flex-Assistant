@@ -5,7 +5,7 @@ in_memory = sqlite3.connect(':memory:', check_same_thread=False)
 conn.backup(in_memory)
 
 def get_help_from_db(transcribed_word, fuzzy, flags):
-    search_results = {'shortcuts_values':[],'shortcuts_comments':[],'shortcuts_aliases':[]}
+    search_results = {'shortcuts_values': [], 'shortcuts_comments': [], 'shortcuts_aliases': []}
     if fuzzy == True:
         transcribed_word = '%'+transcribed_word+'%'
     print(flags)
@@ -26,30 +26,47 @@ def get_help_from_db(transcribed_word, fuzzy, flags):
 def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
     try:
         if shortcut.strip() == '':
-            return (False,'Empty shortcut. Please input shortcut')
+            return False, 'Empty shortcut. Please input shortcut'
         if alias_flag:
             new_alias = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (voice_alias,))
-            alias_id = new_alias.lastrowid
+            #alias_id = new_alias.lastrowid
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment, alias_id) VALUES (?, ?, ?)',
-                                        (shortcut, comment, alias_id,))
+                                        (shortcut, comment, new_alias.lastrowid,))
         else:
             new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', (shortcut, comment,))
         conn.commit()
         conn.backup(in_memory)
-        return (True,'Insert successful')
+        return True, 'Insert successful'
     except Exception as e:
         print(e)
-        return (False,e)
+        return False, e
 
 def bulk_insert_entry(import_list):
     try:
-        new_alias = conn.executemany('INSERT INTO shortcuts (shortcut, comment, )')
+        length_one   = []
+        length_two   = []
+        length_three = []
+        for row in import_list:
+            if len(row) == 2:
+                length_two.append(row)
+            elif len(row) == 3:
+                length_three.append(row)
+            elif len(row) == 1:
+                length_one.append(row)
+        if length_one != []:
+            new_shortcut = conn.executemany('INSERT INTO shortcuts (shortcut) VALUES (?)', length_one)
+        if length_two != []:
+            new_shortcut = conn.executemany('INSERT INTO shortcuts (shortcut, comment) VALUES (?, ?)', length_two)
+        if length_three != []:
+            for row in length_three:
+                new_tag = conn.execute('INSERT INTO voice_aliases (alias) VALUES (?)', (length_three[2],))
+                new_shortcut = conn.execute('INSERT INTO shortcuts (shortcut, comment, alias_id) VALUES (?, ?, ?)', (length_three[0], length_three[1], new_tag))
         conn.commit()
         conn.backup(in_memory)
-        return (True,'Import successful')
+        return True, 'Import successful'
     except Exception as e:
         print(e)
-        return (False,e)
+        return False, e
 
 def delete_row(id):
     try:
@@ -57,10 +74,10 @@ def delete_row(id):
         print(deleting_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return (True,'Shortcut removal successful')
+        return True, 'Shortcut removal successful'
     except Exception as e:
         print(e)
-        return (False,e)
+        return False, e
 
 def update_row(id, index, value):
     try:
@@ -74,13 +91,14 @@ def update_row(id, index, value):
             updating_row_result = conn.execute('UPDATE shortcuts SET comment=(?) WHERE id = (?)', (value, id,)).fetchall()
         else:
             updating_row_result = '***'
+            return True, 'dropdown'
         print(updating_row_result)
         conn.commit()
         conn.backup(in_memory)
-        return (True, 'Update successful')
+        return True, 'Update successful'
     except Exception as e:
         print(e)
-        return (False, e)
+        return False, e
 
 def delete_alias(alias_value):
     try:
@@ -88,7 +106,7 @@ def delete_alias(alias_value):
         print(deleting_alias_result)
         conn.commit()
         conn.backup(in_memory)
-        return (True, 'Tag removal successful')
+        return True, 'Tag removal successful'
     except Exception as e:
         print(e)
-        return (False, e)
+        return False, e

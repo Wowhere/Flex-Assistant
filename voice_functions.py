@@ -26,6 +26,6 @@ def voice_command():
         print(query.split(" : ")[1].strip()[1:-3])
         return query.split(" : ")[1].strip()[1:-3]
     except Exception as e:
-        print(e)
         print('Record failed')
+        print(e)
         return None

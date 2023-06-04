@@ -167,8 +167,8 @@ class AddShortcutsWindow(Tk):
                 initialdir='/',
                 filetypes=filetypes)
         with open(filename) as importfile:
-            imported_rules = list(csv.reader(importfile))
-        print(imported_rules)
+            imported_rules = list(tuple(rule) for rule in csv.reader(importfile, delimiter=self.delimiter_field_text.get()))
+        #print(list(tuple(rule) for rule in imported_rules))
         res = bulk_insert_entry(imported_rules)
         if res[0] == False:
             self.insert_result.config(text=res[1], foreground='red')
