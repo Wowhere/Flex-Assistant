@@ -41,6 +41,16 @@ def insert_entry(shortcut, alias_flag, voice_alias, comment=''):
         print(e)
         return False, e
 
+def get_aliases():
+    try:
+        in_memory.row_factory = lambda cursor, row: row[0]
+        aliases = in_memory.execute('SELECT alias FROM voice_aliases').fetchall()
+        in_memory.row_factory = None
+        return aliases, 'Aliases showed'
+    except Exception as e:
+        print(e)
+        return False, e
+
 def bulk_insert_entry(import_list):
     try:
         length_one   = []
@@ -90,7 +100,7 @@ def update_row(id, index, value):
         elif index == 1:
             updating_row_result = conn.execute('UPDATE shortcuts SET comment=(?) WHERE id = (?)', (value, id,)).fetchall()
         else:
-            updating_row_result = '***'
+            updating_row_result = ""
             return True, 'dropdown'
         print(updating_row_result)
         conn.commit()

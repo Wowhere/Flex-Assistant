@@ -258,7 +258,7 @@ class AssistantApp(Tk):
             self.filessheet.refresh()
             self.editing_button.config(background='#FFAC1C')
             self.editing_button.config(text='Editing on')
-            self.filessheet.dropdown_column(c=3, values = ["val 1", "val 2"])
+            self.filessheet.dropdown_column(c=3, values = get_aliases()[0])
             #self.filessheet.create_dropdown(r=1, c=1, values=[1,2,3,4])
             self.app_mode = 1
         elif self.app_mode == 1:
