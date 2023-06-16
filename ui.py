@@ -255,16 +255,17 @@ class AssistantApp(Tk):
                                                    func=lambda: self.filessheet.delete_sheet_entry())
             self.filessheet.popup_menu_add_command(label='Delete alias',
                                                    func=lambda: self.filessheet.delete_sheet_alias())
+            self.filessheet.dropdown_column(c=3, values=get_aliases()[0], selection_function=change_alias)
             self.filessheet.refresh()
             self.editing_button.config(background='#FFAC1C')
             self.editing_button.config(text='Editing on')
-            self.filessheet.dropdown_column(c=3, values = get_aliases()[0])
-            #self.filessheet.create_dropdown(r=1, c=1, values=[1,2,3,4])
             self.app_mode = 1
         elif self.app_mode == 1:
             self.filessheet.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
             self.filessheet.popup_menu_del_command(label='Delete shortcut')
             self.filessheet.popup_menu_del_command(label='Delete alias')
+            self.filessheet.delete_column_dropdown(c=3)
+            self.filessheet.refresh()
             self.editing_button.config(background='#B0B0B0')
             self.editing_button.config(text='Editing off')
             self.app_mode = 0

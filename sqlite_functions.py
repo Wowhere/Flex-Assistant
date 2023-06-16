@@ -51,6 +51,13 @@ def get_aliases():
         print(e)
         return False, e
 
+def change_alias():
+    try:
+        return [], 'Alias changed'
+    except Exception as e:
+        print(e)
+        return False, e
+
 def bulk_insert_entry(import_list):
     try:
         length_one   = []
