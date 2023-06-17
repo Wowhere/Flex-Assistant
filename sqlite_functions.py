@@ -96,8 +96,9 @@ def delete_row(id):
         print(e)
         return False, e
 
-def update_row(id, index, value):
+def update_row(id, index, value, *e):
     try:
+        print(e)
         print('id,index,value')
         print(id)
         print(index)
@@ -106,9 +107,11 @@ def update_row(id, index, value):
             updating_row_result = conn.execute('UPDATE shortcuts SET shortcut=(?) WHERE id = (?)', (value, id,)).fetchall()
         elif index == 1:
             updating_row_result = conn.execute('UPDATE shortcuts SET comment=(?) WHERE id = (?)', (value, id,)).fetchall()
+        elif index == 2:
+            updating_row_result = conn.execute('UPDATE shortcuts SET alias_id = (SELECT id FROM voice_aliases WHERE alias = (?)) WHERE id = (?);',
+                                               (value, id,)).fetchall()
         else:
-            updating_row_result = ""
-            return True, 'dropdown'
+            return False, 'wrong column'
         print(updating_row_result)
         conn.commit()
         conn.backup(in_memory)

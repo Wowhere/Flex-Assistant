@@ -17,8 +17,10 @@ screen_size = pyautogui.size()
 
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
-        super().__init__(root, theme='light green')
+        super().__init__(root, theme='light green', show_x_scrollbar=True, show_y_scrollbar=True)
         self.headers(header)
+        #self.xscroll_showing = True
+        #self.yscroll_showing = True
         self.hide_columns(columns=0)
         self.set_sheet_data(data)
         self.enable_bindings(('arrowkeys', 'single_select', 'drag_select',
@@ -49,29 +51,17 @@ class DataSheet(tksheet.Sheet):
         delete_alias(cell_data)
 
     def end_edit_cell(self, event):
-        cell_data = self.get_cell_data(event[0], 0, return_copy=True)
-        update_row(cell_data, self.get_currently_selected()[1], event[3])
-        return event[3]
+        #print('end_edit_cell')
+        if event[4] == 'end_edit_cell':
+            cell_data = self.get_cell_data(event[0], 0, return_copy=True)
+            print(event)
+            update_row(cell_data, self.get_currently_selected()[1], event[3])
+            self.refresh()
+            return event[3]
 
     def show_context_menu(self):
         pass
         #Menu(self,)
-
-    # def edit_mode_toggle(self):
-    #     if self.app_mode == 0:
-    #         self.enable_bindings('edit_cell', 'paste')
-    #         self.extra_bindings([('end_edit_cell', self.end_edit_cell)])  #('begin_edit_cell', self.begin_edit_cell),
-    #         self.popup_menu_add_command(label='Delete shortcut',
-    #                                                func=lambda: self.delete_sheet_entry())
-    #         self.popup_menu_add_command(label='Delete alias',
-    #                                                func=lambda: self.delete_sheet_alias())
-    #         self.refresh()
-    #         self.app_mode = 1
-    #     elif self.app_mode == 1:
-    #         self.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
-    #         self.popup_menu_del_command(label='Delete shortcut')
-    #         self.popup_menu_del_command(label='Delete alias')
-    #         self.app_mode = 0
 
 class VoiceActionsMenu(Tk):
     def __init__(self):
@@ -237,6 +227,7 @@ class AssistantApp(Tk):
         self.shortcuts_comments_search.place(x=95, y=45)
         self.shortcuts_alias_search.place(x=195, y=45)
         #self.uniqueness_results_flag.place(x=320, y=50)
+
         self.mainloop()
         #if query != "":
             #self.recent_searches_combobox.insert(0, query)
@@ -250,12 +241,15 @@ class AssistantApp(Tk):
     def edit_mode_toggle(self):
         if self.app_mode == 0:
             self.filessheet.enable_bindings('edit_cell', 'paste')
-            self.filessheet.extra_bindings([('end_edit_cell', self.filessheet.end_edit_cell)])  #('begin_edit_cell', self.begin_edit_cell),
+            self.filessheet.extra_bindings([('end_edit_cell', self.filessheet.end_edit_cell)])
             self.filessheet.popup_menu_add_command(label='Delete shortcut',
                                                    func=lambda: self.filessheet.delete_sheet_entry())
             self.filessheet.popup_menu_add_command(label='Delete alias',
                                                    func=lambda: self.filessheet.delete_sheet_alias())
-            self.filessheet.dropdown_column(c=3, values=get_aliases()[0], selection_function=change_alias)
+            tag_values = self.filessheet.get_column_data(3, get_displayed=True)
+            for i in range(0, len(tag_values)):
+                print(tag_values[i])
+                self.filessheet.create_dropdown(r=i, c=3, values=get_aliases()[0], set_value=tag_values[i])
             self.filessheet.refresh()
             self.editing_button.config(background='#FFAC1C')
             self.editing_button.config(text='Editing on')
@@ -264,7 +258,8 @@ class AssistantApp(Tk):
             self.filessheet.disable_bindings('edit_cell', 'paste', 'begin_edit_cell')
             self.filessheet.popup_menu_del_command(label='Delete shortcut')
             self.filessheet.popup_menu_del_command(label='Delete alias')
-            self.filessheet.delete_column_dropdown(c=3)
+            for i in range(0, len(self.filessheet.get_column_data(3))):
+                self.filessheet.delete_dropdown(r=i, c=3)
             self.filessheet.refresh()
             self.editing_button.config(background='#B0B0B0')
             self.editing_button.config(text='Editing off')
