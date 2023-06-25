@@ -28,4 +28,4 @@ def voice_command():
     except Exception as e:
         print('Record failed')
         print(e)
-        return None
+        return (e)

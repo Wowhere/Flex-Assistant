@@ -1,6 +1,6 @@
 import sys
 from tkinter import Tk, Label, Button, Entry, StringVar, Radiobutton, BooleanVar, Menu, Checkbutton, IntVar, Text, ttk, NW, N, S, W, E, Canvas, Frame
-from tkinter import scrolledtext as st, filedialog as fd
+from tkinter import scrolledtext as st, filedialog as fd, messagebox
 #import tkinter.font
 ##from ttkthemes import ThemedTk
 import tksheet
@@ -15,12 +15,13 @@ import csv
 
 screen_size = pyautogui.size()
 
+def show_warning(title='Warning', message='Warning during execution'):
+    messagebox.showwarning(title=title, message=message)
+
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
         super().__init__(root, theme='light green', show_x_scrollbar=True, show_y_scrollbar=True)
         self.headers(header)
-        #self.xscroll_showing = True
-        #self.yscroll_showing = True
         self.hide_columns(columns=0)
         self.set_sheet_data(data)
         self.enable_bindings(('arrowkeys', 'single_select', 'drag_select',
@@ -211,9 +212,12 @@ class AssistantApp(Tk):
         self.shortcuts_comments_search = Checkbutton(self, text='Comment', variable=self.comments_search_flag)
         self.shortcuts_alias_search = Checkbutton(self, text='Tag', variable=self.alias_search_flag)
         #self.uniqueness_results_flag = Checkbutton(self, text='Unique', variable=self.uniquenes s_flag)
-        if query != "":
-            self.recent_searches_combobox.insert(0, query)
-            self.show_search_results(query, 1)
+        if type(query) != tuple:
+            if query != "":
+                self.recent_searches_combobox.insert(0, query)
+                self.show_search_results(query, 1)
+        else:
+            show_warning('Recognizing exception', query)
         self.recent_searches_combobox.place(x=5, y=10, width=280, height=30)
         self.recent_searches_combobox.bind('<Return>', lambda event: self.show_search_results(self.search_text.get(), self.search_type.get()))
 
