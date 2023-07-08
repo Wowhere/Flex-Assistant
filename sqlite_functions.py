@@ -5,7 +5,7 @@ in_memory = sqlite3.connect(':memory:', check_same_thread=False)
 conn.backup(in_memory)
 
 def get_help_from_db(transcribed_word, fuzzy, flags):
-    search_results = {'shortcuts_values': [], 'shortcuts_comments': [], 'shortcuts_aliases': []}
+    search_results = {'shortcuts_values': [], 'shortcuts_comments': [], 'shortcuts_tags': []}
     if fuzzy == True:
         transcribed_word = '%'+transcribed_word+'%'
     print(flags)
