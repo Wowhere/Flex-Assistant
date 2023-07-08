@@ -230,9 +230,10 @@ class AssistantApp(Tk):
         self.shortcuts_values_search.place(x=5, y=45)
         self.shortcuts_comments_search.place(x=95, y=45)
         self.shortcuts_alias_search.place(x=195, y=45)
-        #self.uniqueness_results_flag.place(x=320, y=50)
-
+        self.focus_force()
+        self.recent_searches_combobox.focus()
         self.mainloop()
+
         #if query != "":
             #self.recent_searches_combobox.insert(0, query)
             #self.show_search_results(query, 1)
