@@ -4,19 +4,50 @@ from tkinter import scrolledtext as st, filedialog as fd, messagebox
 #import tkinter.font
 ##from ttkthemes import ThemedTk
 import tksheet
-import pyautogui
-from subprocess import check_output, run
 from sqlite_functions import *
-from voice_functions import *
+from automate import *
 import csv
-#import pprint
+import speech_recognition as sr
+import os
+import json
 
-#pp = pprint.PrettyPrinter(indent=4)
+DEFAULT_APP_SETTINGS = {
+    'app_shortcut': '',
+    'energy_threshold': 450,
+    'pause_threshold': 0.5,
+    'adjust_for_ambient_noise': False,
+    'datasheet_theme': 'light green',
+    'datasheet_text_color': '',
+    'datasheet_highlight_color': '',
+    'datasheet_background_color': '',
+    'add_window_width': 800,
+    'add_window_height': 270,
+    'add_window_topmost': True,
+    'add_window_single': True,
+    'assistant_window_width': 530,
+    'assistant_window_height': 135,
+    'assistant_window_topmost': True,
+    'assistant_window_single': True
+}
 
-screen_size = pyautogui.size()
+def get_app_settings():
+    pass
 
 def show_warning(title='Warning', message='Warning during execution'):
     messagebox.showwarning(title=title, message=message)
+
+model_flag = True
+if not os.path.isdir('model'):
+    show_warning('\'Model\' folder is absent',
+                 '\'Model\' folder is absent. Add folder \'Model\' with vosk model in folder with application for work of voice search')
+    model_flag = False
+elif len(os.listdir('model')) == 0:
+    show_warning('\'Model\' folder is empty',
+                 '\'Model\' folder is empty. Add vosk model to folder \'Model\' for work of voice search')
+    model_flag = False
+
+if model_flag:
+    recognizer = sr.Recognizer()
 
 class DataSheet(tksheet.Sheet):
     def __init__(self, root, header, data):
@@ -73,14 +104,39 @@ class VoiceActionsMenu(Tk):
         self.resizable(True, True)
         self.mainloop()
 
-class VoiceSearchIndicator(Tk):
-    def __init__(self):
-        super().__init__()
-        self.title('Searching...')
-        self.call('wm', 'attributes', '.', '-topmost', '1')
-        self.geometry(str('800') + 'x' + str('290'))
-        self.resizable(False, False)
-        self.mainloop()
+def voice_searching():
+    search_window = Tk()
+    base_width = 550
+    base_height = 135
+    search_window.title('Listening...')
+    search_window.call('wm', 'attributes', '.', '-topmost', '1')
+    #search_window.geometry('%dx%d+%d+%d' % (200, 200, 205, 290))
+    search_window.geometry('%dx%d+%d+%d' % (200, 200, screen_size[0] - 205, screen_size[1] - 290))
+    search_window.attributes('-toolwindow', True)
+    search_window.resizable(False, False)
+    canvas = Canvas(search_window)
+    canvas.pack()
+    indicator = canvas.create_oval(60, 60, 130, 130, fill='red')
+    active_window = True
+    while active_window:
+        search_window.update()
+        with sr.Microphone() as source:
+            recognizer.pause_threshold = 0.6
+            recognizer.energy_threshold = 500
+            recognizer.adjust_for_ambient_noise(source, 0.8)
+            audio = recognizer.listen(source)
+            search_window.title('Recognizing...')
+            canvas.itemconfig(indicator, fill='yellow')
+            search_window.update()
+            query = recognizer.recognize_vosk(audio, language='en')
+            v_query = query.split(' : ')[1].strip()[1:-3]
+            print(v_query)
+            if v_query.strip() != '':
+                search_window.destroy()
+                active_window = False
+                AssistantApp(query=v_query)
+            else:
+                show_warning('Empty message', 'Please, say louder')
 
 class AddShortcutsWindow(Tk):
     def __init__(self):
@@ -187,7 +243,7 @@ class AssistantApp(Tk):
         base_height = 135
         if height == 0 and width == 0:
             #self.geometry(str(400) + 'x' + str(135) + '+' + str(screen_size[0]-405) + '+' + str(screen_size[1]-225))
-            self.geometry(str(base_width) + 'x' + str(base_height) + '+' + str(screen_size[0] - (base_width+5)) + '+' + str(screen_size[1] - (base_height+90)))
+            self.geometry('%dx%d+%d+%d' % (base_width, base_height, screen_size[0] - (base_width+5), screen_size[1] - (base_height+90)))
         else:
             self.geometry(str(width) + 'x' + str(height))
         self.search_type = BooleanVar(self)
@@ -214,6 +270,7 @@ class AssistantApp(Tk):
         #self.uniqueness_results_flag = Checkbutton(self, text='Unique', variable=self.uniquenes s_flag)
         if type(query) != tuple:
             if query != "":
+                #print(999)
                 self.recent_searches_combobox.insert(0, query)
                 self.show_search_results(query, 1)
         else:
@@ -331,8 +388,3 @@ class AssistantApp(Tk):
         self.filessheet.set_all_cell_sizes_to_text()
         self.filessheet.set_column_widths([345, 120, 70])
         self.recent_searches_combobox.focus()
-
-    def get_voice_input(self):
-        query = voice_command()
-        files, shells, links = get_help_from_db(query)
-        self.show_search_results([files, shells, links])
