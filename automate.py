@@ -1,19 +1,23 @@
-import os
+import subprocess
+import webbrowser
+import pyautogui
 
-def terminal_execute():
+screen_size = pyautogui.size()
+
+def terminal_execute(cmd, shell=False):
+    return subprocess.call(cmd, shell)
+
+def browser_open(link, new=0):
+    return webbrowser.open(link, new)
+
+def file_open(fname):
+    return subprocess.call('start', fname)
+
+def volume_set():
     pass
 
-def browser_open():
+def gui_recording():
     pass
 
-def file_open():
-    pass
-
-def handler_execute():
-    pass
-
-def remote_control_window_paste():
-    pass
-
-def last_active_textbox_paste():
+def gui_replay():
     pass

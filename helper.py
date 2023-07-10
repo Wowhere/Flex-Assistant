@@ -1,11 +1,13 @@
 import os
 from pystray import Icon, Menu, MenuItem
 from PIL import Image
-#from keyboard import add_hotkey
+from keyboard import add_hotkey
 from ui import AssistantApp, AddShortcutsWindow, model_flag, voice_searching
 
 def setup_icon(icon):
     icon.visible = True
+    add_hotkey('Ctrl+Shift+z', app_restore)
+    add_hotkey('Ctrl+Shift+x', voice_searching)
 
 def close_tray(icon):
     icon.visible = False
@@ -31,6 +33,7 @@ if __name__ == '__main__':
 #        MenuItem('Settings', edit_settings),
         MenuItem('Exit', lambda: close_tray(icon)))
     icon = Icon('Helper', image, 'Helper', right_click_menu)
-    # add_hotkey('Ctrl+`', fast_answer)
+    #add_hotkey('Ctrl+Shift+z', app_restore)
+    #add_hotkey('Ctrl+Shift+x', voice_searching)
     # greeting()
     icon.run_detached(setup_icon)
